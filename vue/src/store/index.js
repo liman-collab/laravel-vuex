@@ -13,18 +13,27 @@ const store = createStore({
   actions:
   {
     register({commit},user){
-      return axiosClient.post('register',user)
+      return axiosClient.post('/register',user)
         .then(({data})=>{
-          commit('setUser',data);
+          commit('setUser', data.user);
+          commit('setToken', data.token)
           return data;
         })
     },
     login({commit},user){
-    return axiosClient.post('login',user)
+    return axiosClient.post('/login',user)
       .then(({data})=>{
-        commit('setUser',data);
+        commit('setUser', data.user);
+        commit('setToken', data.token)
         return data;
       })
+    },
+    logout({commit}){
+      return axiosClient.post('/logout')
+        .then(response=>{
+          commit('logout')
+          return response;
+        })
     }
  },
   //commit
@@ -32,13 +41,15 @@ const store = createStore({
     logout:state =>{
       state.user.data = {};
       state.user.token = null;
+      sessionStorage.removeItem("TOKEN");
     },
-    setUser:(state,userData)=>{
-      state.user.token = userData.token;
-      state.user.data = userData.user;
-      //if we reload the page the token still it would be available and the user would be in dashboard
-      sessionStorage.setItem('TOKEN',userData.token);
-    }
+    setUser: (state, user) => {
+      state.user.data = user;
+    },
+    setToken: (state, token) => {
+      state.user.token = token;
+      sessionStorage.setItem('TOKEN', token);
+    },
   },
   modules:{}
 })
